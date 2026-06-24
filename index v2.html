@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Techfest IIT Bombay — 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+:root{
+  --void:#040510;
+  --aurora:#0a0d2e;
+  --gold:#e8c460;
+  --gold-dim:rgba(232,196,96,0.15);
+  --blue:#4a9eff;
+  --cream:#f5f0e8;
+  --cream-dark:#0a0510;
+  --text:rgba(235,232,248,0.82);
+  --dim:rgba(235,232,248,0.42);
+  --line:rgba(235,232,248,0.08);
+}
+body{background:var(--void);color:#ebe8f8;font-family:'Space Grotesk',sans-serif;overflow-x:hidden;}
+::selection{background:var(--gold);color:#000;}
+::-webkit-scrollbar{width:3px;}
+::-webkit-scrollbar-thumb{background:var(--gold);}
+
+/* CANVAS */
+#bg-canvas{position:fixed;inset:0;z-index:0;pointer-events:none;}
+
+/* all sections above canvas */
+nav,section,footer{position:relative;z-index:2;}
+
+/* ── NAV ── */
+nav{position:fixed;top:0;left:0;right:0;z-index:50;display:flex;align-items:center;justify-content:space-between;padding:1.3rem 5vw;transition:background .4s;}
+nav.scrolled{background:rgba(4,5,16,.85);backdrop-filter:blur(14px);border-bottom:1px solid var(--line);}
+.logo{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:1.3rem;letter-spacing:.04em;color:#ebe8f8;}
+.logo span{color:var(--gold);}
+.nav-r{display:flex;align-items:center;gap:2.5rem;}
+.nav-links{display:flex;gap:2rem;list-style:none;}
+.nav-links a{font-family:'JetBrains Mono',monospace;font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);text-decoration:none;transition:color .2s;}
+.nav-links a:hover{color:var(--gold);}
+.nav-btn{font-family:'JetBrains Mono',monospace;font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;background:transparent;border:1px solid var(--gold);color:var(--gold);padding:.55rem 1.3rem;cursor:pointer;transition:background .2s;}
+.nav-btn:hover{background:var(--gold);color:#000;}
+
+/* ── HERO ── */
+#hero{height:100vh;display:flex;align-items:center;overflow:hidden;}
+.hero-inner{padding:0 5vw;max-width:1100px;width:100%;}
+.hero-kicker{font-family:'JetBrains Mono',monospace;font-size:.72rem;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);margin-bottom:2.2rem;display:flex;align-items:center;gap:.8rem;opacity:0;animation:fadeUp .9s .3s ease both;}
+.hero-kicker::before{content:'';width:36px;height:1px;background:var(--gold);}
+.hero-h1{font-family:'Cormorant Garamond',serif;font-size:clamp(4rem,10vw,9.5rem);font-weight:300;line-height:.95;letter-spacing:-.01em;margin-bottom:2.5rem;opacity:0;animation:fadeUp 1s .5s ease both;}
+.hero-h1 .l1{display:block;color:#ebe8f8;font-style:italic;}
+.hero-h1 .l2{display:block;color:var(--gold);font-weight:600;font-style:normal;}
+.hero-h1 .l3{display:block;color:var(--dim);font-size:.38em;font-family:'Space Grotesk',sans-serif;font-weight:300;letter-spacing:.18em;text-transform:uppercase;font-style:normal;margin-top:.6rem;}
+.hero-row{display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:2rem;opacity:0;animation:fadeUp 1s .75s ease both;}
+.hero-desc{font-size:1.05rem;line-height:1.75;color:var(--text);max-width:440px;}
+.hero-actions{display:flex;gap:1rem;align-items:center;flex-wrap:wrap;}
+.btn-gold{font-family:'JetBrains Mono',monospace;font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;background:var(--gold);color:#000;border:none;padding:1rem 2rem;cursor:pointer;font-weight:500;text-decoration:none;display:inline-block;transition:transform .2s,box-shadow .2s;}
+.btn-gold:hover{transform:translateY(-3px);box-shadow:0 14px 36px rgba(232,196,96,.3);}
+.btn-ghost{font-family:'JetBrains Mono',monospace;font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;background:transparent;border:1px solid var(--line);color:var(--dim);padding:1rem 2rem;cursor:pointer;text-decoration:none;display:inline-block;transition:border-color .2s,color .2s;}
+.btn-ghost:hover{border-color:var(--gold);color:var(--gold);}
+.scroll-indicator{position:absolute;bottom:2rem;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:.5rem;font-family:'JetBrains Mono',monospace;font-size:.6rem;letter-spacing:.15em;text-transform:uppercase;color:var(--dim);opacity:0;animation:fadeUp .8s 1.2s ease both;}
+.s-line{width:1px;height:52px;background:linear-gradient(var(--gold),transparent);animation:pulse 2s ease-in-out infinite;}
+@keyframes pulse{0%,100%{opacity:.25;}50%{opacity:1;}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(28px);}to{opacity:1;transform:translateY(0);}}
+
+/* ── MOUSE PARALLAX LAYERS ── */
+.mp-layer{position:absolute;inset:0;will-change:transform;pointer-events:none;}
+
+/* ── MARQUEE STRIP ── */
+.marquee-wrap{border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:rgba(232,196,96,.04);padding:.8rem 0;overflow:hidden;}
+.marquee{display:flex;gap:3rem;white-space:nowrap;animation:marqueeMove 24s linear infinite;}
+.marquee span{font-family:'JetBrains Mono',monospace;font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);}
+.marquee .hi{color:var(--gold);}
+@keyframes marqueeMove{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+
+/* ── INTRO ── */
+#intro{padding:14vh 5vw;max-width:1000px;margin:0 auto;}
+.intro-text{font-family:'Cormorant Garamond',serif;font-size:clamp(2.2rem,4.5vw,4rem);font-weight:300;line-height:1.2;color:#ebe8f8;}
+.intro-text em{color:var(--gold);font-style:italic;}
+.intro-text .reveal-line{display:block;overflow:hidden;}
+.intro-text .reveal-inner{display:block;transform:translateY(110%);transition:transform .9s cubic-bezier(.16,1,.3,1);}
+.intro-text .reveal-inner.in{transform:translateY(0);}
+.intro-sub{margin-top:2.5rem;font-size:1rem;line-height:1.8;color:var(--dim);max-width:560px;opacity:0;transform:translateY(20px);transition:opacity .8s .4s,transform .8s .4s;}
+.intro-sub.in{opacity:1;transform:translateY(0);}
+
+/* ── DOMAINS ── */
+#domains{padding:10vh 0;}
+.sec-head{padding:0 5vw;margin-bottom:4rem;}
+.eyebrow{font-family:'JetBrains Mono',monospace;font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:.8rem;}
+.sec-title{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:clamp(2rem,4vw,3.5rem);line-height:1.1;}
+.sec-title em{color:var(--blue);font-style:italic;}
+.cards-track{display:grid;grid-template-columns:repeat(6,340px);gap:1.2rem;padding:0 5vw;overflow-x:auto;scrollbar-width:none;cursor:grab;}
+.cards-track::-webkit-scrollbar{display:none;}
+.cards-track:active{cursor:grabbing;}
+.domain-card{background:rgba(10,13,46,.7);border:1px solid var(--line);padding:2.5rem 2rem;flex:0 0 auto;transition:border-color .3s,background .3s;transform-style:preserve-3d;will-change:transform;}
+.domain-card:hover{border-color:rgba(232,196,96,.4);background:rgba(232,196,96,.05);}
+.dc-num{font-family:'JetBrains Mono',monospace;font-size:.65rem;letter-spacing:.1em;color:var(--dim);margin-bottom:1.4rem;}
+.dc-icon{font-size:2.2rem;margin-bottom:1.2rem;display:block;}
+.dc-name{font-family:'Cormorant Garamond',serif;font-size:1.7rem;font-weight:400;margin-bottom:.8rem;}
+.dc-desc{font-size:.88rem;line-height:1.65;color:var(--dim);}
+.dc-pts{display:inline-flex;align-items:center;gap:.4rem;margin-top:1.4rem;font-family:'JetBrains Mono',monospace;font-size:.68rem;letter-spacing:.08em;color:var(--gold);}
+
+/* ── NUMBERS (LIGHT SECTION) ── */
+#numbers{background:var(--cream);color:var(--cream-dark);padding:12vh 5vw;}
+.nums-head .eyebrow{color:#6b4a00;}
+.nums-head .sec-title{color:var(--cream-dark);}
+.nums-head .sec-title em{color:#6b4a00;font-style:italic;}
+.nums-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;background:rgba(10,5,16,.08);margin-top:4rem;}
+.nc{background:var(--cream);padding:3.5rem 2rem;position:relative;overflow:hidden;}
+.nc::after{content:'';position:absolute;bottom:0;left:0;right:0;height:3px;background:#0a0510;transform:scaleX(0);transform-origin:left;transition:transform .5s ease;}
+.nc:hover::after{transform:scaleX(1);}
+.nc-val{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:clamp(3rem,6vw,5.5rem);color:#0a0510;line-height:1;display:block;}
+.nc-lbl{font-family:'JetBrains Mono',monospace;font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:rgba(10,5,16,.55);margin-top:.8rem;display:block;}
+
+/* ── PARALLAX SPLIT ── */
+#split{height:160vh;position:relative;}
+.split-sticky{position:sticky;top:0;height:100vh;display:grid;grid-template-columns:1fr 1fr;overflow:hidden;}
+.split-left{background:var(--aurora);display:flex;align-items:center;padding:0 5vw;position:relative;overflow:hidden;}
+.split-left-inner{position:relative;z-index:2;will-change:transform;}
+.split-tag{font-family:'JetBrains Mono',monospace;font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:1.5rem;}
+.split-h{font-family:'Cormorant Garamond',serif;font-size:clamp(2.5rem,4vw,4rem);font-weight:300;line-height:1.1;margin-bottom:1.5rem;}
+.split-h em{color:var(--gold);font-style:italic;}
+.split-body{font-size:.98rem;line-height:1.8;color:var(--text);margin-bottom:2.5rem;}
+.split-bg-text{position:absolute;font-family:'Cormorant Garamond',serif;font-size:22vw;font-weight:700;color:rgba(255,255,255,.03);line-height:1;bottom:-5%;left:-3%;pointer-events:none;white-space:nowrap;user-select:none;}
+.split-right{background:var(--void);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;}
+.float-panel{width:320px;background:rgba(10,13,46,.8);border:1px solid var(--line);padding:2.5rem;position:relative;will-change:transform;}
+.fp-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.8rem;padding-bottom:1.2rem;border-bottom:1px solid var(--line);}
+.fp-title{font-family:'Cormorant Garamond',serif;font-size:1.1rem;}
+.fp-badge{font-family:'JetBrains Mono',monospace;font-size:.62rem;letter-spacing:.08em;text-transform:uppercase;background:rgba(232,196,96,.12);color:var(--gold);padding:.3rem .7rem;}
+.fp-rows{display:flex;flex-direction:column;gap:.9rem;}
+.fp-row{display:flex;justify-content:space-between;align-items:center;}
+.fp-key{font-family:'JetBrains Mono',monospace;font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);}
+.fp-val{font-family:'Space Grotesk',sans-serif;font-size:.9rem;font-weight:500;color:#ebe8f8;}
+.fp-bar-wrap{margin-top:1.8rem;padding-top:1.5rem;border-top:1px solid var(--line);}
+.fp-bar-label{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:.65rem;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);margin-bottom:.5rem;}
+.fp-bar-label span:last-child{color:var(--gold);}
+.fp-track{height:4px;background:rgba(255,255,255,.07);}
+.fp-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--blue));width:0;transition:width 1.4s cubic-bezier(.3,.8,.3,1);}
+.panel-orb{position:absolute;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(74,158,255,.12),transparent 70%);bottom:-60px;right:-60px;pointer-events:none;}
+
+/* ── CTA ── */
+#cta{padding:14vh 5vw;text-align:center;position:relative;overflow:hidden;}
+.cta-glow{position:absolute;width:700px;height:700px;border-radius:50%;background:radial-gradient(circle,rgba(232,196,96,.07),transparent 70%);top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;}
+.cta-kicker{font-family:'JetBrains Mono',monospace;font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:2rem;}
+.cta-h{font-family:'Cormorant Garamond',serif;font-weight:300;font-size:clamp(3rem,7vw,7rem);line-height:.95;margin-bottom:1.5rem;}
+.cta-h em{color:var(--gold);font-style:italic;}
+.cta-desc{font-size:1rem;line-height:1.75;color:var(--text);max-width:500px;margin:0 auto 3rem;}
+.cta-actions{display:flex;gap:1.2rem;justify-content:center;flex-wrap:wrap;}
+
+/* ── FOOTER ── */
+footer{border-top:1px solid var(--line);padding:2.5rem 5vw;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;}
+.f-brand{font-family:'Cormorant Garamond',serif;font-size:1.05rem;font-weight:600;}
+.f-brand span{color:var(--gold);}
+.f-copy{font-family:'JetBrains Mono',monospace;font-size:.63rem;letter-spacing:.08em;color:var(--dim);text-transform:uppercase;}
+.f-dot{color:var(--gold);}
+
+@media(max-width:900px){
+  .nav-links{display:none;}
+  .hero-row{flex-direction:column;align-items:flex-start;}
+  .nums-grid{grid-template-columns:1fr 1fr;}
+  .split-sticky{grid-template-columns:1fr;}
+  .split-right{display:none;}
+  #split{height:100vh;}
+  .split-sticky{display:block;}
+  .split-left{height:100vh;}
+}
+@media(max-width:600px){
+  .nums-grid{grid-template-columns:1fr 1fr;}
+  .cards-track{grid-template-columns:repeat(6,85vw);}
+  footer{flex-direction:column;text-align:center;}
+}
+@media(prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important;}
+  .marquee{animation:none;}
+}
+</style>
+</head>
+<body>
+
+<canvas id="bg-canvas"></canvas>
+
+<nav id="nav">
+  <div class="logo">TECH<span>FEST</span></div>
+  <div class="nav-r">
+    <ul class="nav-links">
+      <li><a href="#domains">Domains</a></li>
+      <li><a href="#numbers">Scale</a></li>
+      <li><a href="#split">Journey</a></li>
+      <li><a href="#cta">Join</a></li>
+    </ul>
+    <button class="nav-btn" onclick="window.open('https://ca.techfest.org','_blank')">Apply Now</button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="mp-layer" id="mp1"></div>
+  <div class="mp-layer" id="mp2"></div>
+  <div class="hero-inner">
+    <p class="hero-kicker">Asia's Largest Sci-Tech Festival · IIT Bombay · 2026–27</p>
+    <h1 class="hero-h1">
+      <span class="l1">The world's</span>
+      <span class="l2">Most ambitious</span>
+      <span class="l3">Festival of science &amp; technology</span>
+    </h1>
+    <div class="hero-row">
+      <p class="hero-desc">Techfest draws 190,000 visitors from 56 countries across 200+ events. This is where breakthroughs happen and careers begin — and you can be at the centre of it.</p>
+      <div class="hero-actions">
+        <a href="#domains" class="btn-gold">Explore Domains</a>
+        <a href="https://ca.techfest.org" target="_blank" class="btn-ghost">Become a CA →</a>
+      </div>
+    </div>
+  </div>
+  <div class="scroll-indicator"><span>Scroll</span><div class="s-line"></div></div>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee-wrap">
+  <div class="marquee">
+    <span>Techfest <span class="hi">2026</span></span><span>·</span>
+    <span>190K+ Footfall</span><span>·</span>
+    <span><span class="hi">56</span> Countries</span><span>·</span>
+    <span>200+ Events</span><span>·</span>
+    <span>College Ambassador <span class="hi">Program</span></span><span>·</span>
+    <span>IIT Bombay</span><span>·</span>
+    <span>Asia's Largest <span class="hi">Sci-Tech Festival</span></span><span>·</span>
+    <span>Techfest <span class="hi">2026</span></span><span>·</span>
+    <span>190K+ Footfall</span><span>·</span>
+    <span><span class="hi">56</span> Countries</span><span>·</span>
+    <span>200+ Events</span><span>·</span>
+    <span>College Ambassador <span class="hi">Program</span></span><span>·</span>
+    <span>IIT Bombay</span><span>·</span>
+    <span>Asia's Largest <span class="hi">Sci-Tech Festival</span></span><span>·</span>
+  </div>
+</div>
+
+<!-- INTRO -->
+<section id="intro">
+  <div class="intro-text">
+    <span class="reveal-line"><span class="reveal-inner">Every December, something shifts</span></span>
+    <span class="reveal-line"><span class="reveal-inner">in the air at IIT Bombay.</span></span>
+    <span class="reveal-line"><span class="reveal-inner"><em>190,000 people</em> pour in from</span></span>
+    <span class="reveal-line"><span class="reveal-inner">56 countries to witness what</span></span>
+    <span class="reveal-line"><span class="reveal-inner">science looks like when it has</span></span>
+    <span class="reveal-line"><span class="reveal-inner"><em>no ceiling.</em></span></span>
+  </div>
+  <p class="intro-sub" id="intro-sub">As a College Ambassador, you're not attending — you're building it. Tasks, coins, leaderboards, real impact. Starting July 1, 2026.</p>
+</section>
+
+<!-- DOMAINS -->
+<section id="domains">
+  <div class="sec-head">
+    <p class="eyebrow">What you'll work on</p>
+    <h2 class="sec-title">Six domains, <em>one mission</em></h2>
+  </div>
+  <div class="cards-track" id="cards-track">
+    <div class="domain-card" data-tilt>
+      <div class="dc-num">01 / 06</div>
+      <span class="dc-icon">🎨</span>
+      <div class="dc-name">Creatives</div>
+      <p class="dc-desc">Design, branding, and visual storytelling that makes Techfest impossible to ignore.</p>
+      <span class="dc-pts">🪙 50+ coins per task</span>
+    </div>
+    <div class="domain-card" data-tilt>
+      <div class="dc-num">02 / 06</div>
+      <span class="dc-icon">⚡</span>
+      <div class="dc-name">Web Dev</div>
+      <p class="dc-desc">Build real interactive products — parallax pages, 3D sites, tools that actually ship.</p>
+      <span class="dc-pts">🪙 100–150 coins per task</span>
+    </div>
+    <div class="domain-card" data-tilt>
+      <div class="dc-num">03 / 06</div>
+      <span class="dc-icon">📣</span>
+      <div class="dc-name">Marketing</div>
+      <p class="dc-desc">Drive awareness through campaigns, reels, referrals, and outreach that moves numbers.</p>
+      <span class="dc-pts">🪙 100+ coins per task</span>
+    </div>
+    <div class="domain-card" data-tilt>
+      <div class="dc-num">04 / 06</div>
+      <span class="dc-icon">🌏</span>
+      <div class="dc-name">Social Outreach</div>
+      <p class="dc-desc">Build community. Bring your campus into Techfest's orbit one conversation at a time.</p>
+      <span class="dc-pts">🪙 75+ coins per task</span>
+    </div>
+    <div class="domain-card" data-tilt>
+      <div class="dc-num">05 / 06</div>
+      <span class="dc-icon">🎬</span>
+      <div class="dc-name">Media &amp; Publicity</div>
+      <p class="dc-desc">Coverage, press, and documentation. Make sure the world knows what's happening.</p>
+      <span class="dc-pts">🪙 75+ coins per task</span>
+    </div>
+    <div class="domain-card" data-tilt>
+      <div class="dc-num">06 / 06</div>
+      <span class="dc-icon">📅</span>
+      <div class="dc-name">Event Management</div>
+      <p class="dc-desc">On-ground coordination, logistics, and the invisible work that makes the magic visible.</p>
+      <span class="dc-pts">🪙 80+ coins per task</span>
+    </div>
+  </div>
+  <p style="font-family:'JetBrains Mono',monospace;font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);padding:1.5rem 5vw 0;text-align:center;">← Drag to explore →</p>
+</section>
+
+<!-- NUMBERS (LIGHT) -->
+<section id="numbers">
+  <div class="nums-head sec-head">
+    <p class="eyebrow">By the numbers</p>
+    <h2 class="sec-title">The scale is <em>not an accident</em></h2>
+  </div>
+  <div class="nums-grid">
+    <div class="nc"><span class="nc-val counter-v" data-t="190">0</span><span class="nc-lbl">Thousand visitors each year</span></div>
+    <div class="nc"><span class="nc-val counter-v" data-t="56">0</span><span class="nc-lbl">Countries represented</span></div>
+    <div class="nc"><span class="nc-val counter-v" data-t="200">0</span><span class="nc-lbl">Events across all domains</span></div>
+    <div class="nc"><span class="nc-val counter-v" data-t="28">0</span><span class="nc-lbl">Years of unbroken legacy</span></div>
+  </div>
+</section>
+
+<!-- PARALLAX SPLIT -->
+<section id="split">
+  <div class="split-sticky">
+    <div class="split-left">
+      <div class="split-bg-text" id="bg-word">JULY</div>
+      <div class="split-left-inner" id="split-inner">
+        <p class="split-tag" id="split-tag">Starting · July 1, 2026</p>
+        <h2 class="split-h" id="split-h">The CA program<br/>is the <em>fastest track</em><br/>to the main stage.</h2>
+        <p class="split-body" id="split-body">Tasks unlock in batches. Coins stack up. The dashboard tells you exactly where you stand. By the time December arrives, the strongest ambassadors have already shaped the fest you're attending.</p>
+        <a href="https://ca.techfest.org" target="_blank" class="btn-gold">Start 1 July →</a>
+      </div>
+    </div>
+    <div class="split-right">
+      <div class="float-panel" id="float-panel">
+        <div class="panel-orb"></div>
+        <div class="fp-top">
+          <span class="fp-title">CA Dashboard</span>
+          <span class="fp-badge">● Live</span>
+        </div>
+        <div class="fp-rows">
+          <div class="fp-row"><span class="fp-key">Program</span><span class="fp-val">College Ambassador</span></div>
+          <div class="fp-row"><span class="fp-key">Start date</span><span class="fp-val">1 July 2026</span></div>
+          <div class="fp-row"><span class="fp-key">End date</span><span class="fp-val">Techfest 2026-27</span></div>
+          <div class="fp-row"><span class="fp-key">Benefits</span><span class="fp-val">Performance-based</span></div>
+          <div class="fp-row"><span class="fp-key">Location</span><span class="fp-val">Your campus</span></div>
+        </div>
+        <div class="fp-bar-wrap">
+          <div class="fp-bar-label"><span>Program progress</span><span>Jul → Dec</span></div>
+          <div class="fp-track"><div class="fp-fill" id="fp-fill"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section id="cta">
+  <div class="cta-glow"></div>
+  <p class="cta-kicker">One decision</p>
+  <h2 class="cta-h">Be part of <em>what's next.</em></h2>
+  <p class="cta-desc">190,000 people will be at Techfest in December. A few hundred of them helped build it. You can be one of them.</p>
+  <div class="cta-actions">
+    <a href="https://ca.techfest.org" target="_blank" class="btn-gold">Join the CA Program</a>
+    <a href="https://techfest.org" target="_blank" class="btn-ghost">Explore Techfest</a>
+  </div>
+</section>
+
+<footer>
+  <div class="f-brand">TECH<span>FEST</span> · IIT Bombay</div>
+  <p class="f-copy">Asia's largest science &amp; technology festival <span class="f-dot">●</span> Dec 2026</p>
+</footer>
+
+<script>
+/* ══ CANVAS STARFIELD (4 depth layers) ══ */
+const canvas = document.getElementById('bg-canvas');
+const ctx = canvas.getContext('2d');
+let W, H, stars = [], mouse = {x:0, y:0};
+
+function resize(){
+  W = canvas.width = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+}
+
+// 4 depth layers: speed, size, opacity, count
+const layers = [
+  {speed:0.08, size:[0.3,0.7], opacity:[0.2,0.45], count:220},
+  {speed:0.18, size:[0.5,1.1], opacity:[0.3,0.6],  count:130},
+  {speed:0.32, size:[0.8,1.6], opacity:[0.4,0.75], count:70},
+  {speed:0.55, size:[1.2,2.5], opacity:[0.55,0.9], count:28},
+];
+
+function initStars(){
+  stars = [];
+  layers.forEach((l,li)=>{
+    for(let i=0;i<l.count;i++){
+      stars.push({
+        x: Math.random()*W,
+        y: Math.random()*H,
+        ox: Math.random()*W,  // original x
+        oy: Math.random()*H,
+        size: l.size[0]+Math.random()*(l.size[1]-l.size[0]),
+        opacity: l.opacity[0]+Math.random()*(l.opacity[1]-l.opacity[0]),
+        layer: li,
+        speed: l.speed,
+        twinkle: Math.random()*Math.PI*2,
+        twinkleSpeed: 0.008+Math.random()*0.015,
+        gold: Math.random() < 0.08,
+        blue: Math.random() < 0.05,
+      });
+    }
+  });
+}
+
+let sy = 0, ry = 0;
+function drawStars(){
+  ry += (sy - ry)*0.08; // smooth scroll
+  ctx.clearRect(0,0,W,H);
+
+  const mx = (mouse.x/W - 0.5);
+  const my = (mouse.y/H - 0.5);
+
+  stars.forEach(s=>{
+    s.twinkle += s.twinkleSpeed;
+    const tw = 0.75 + Math.sin(s.twinkle)*0.25;
+
+    // parallax: scroll + mouse
+    const scrollOff = ry * s.speed * 0.3;
+    const mouseOffX = mx * s.speed * 40;
+    const mouseOffY = my * s.speed * 30;
+
+    let px = s.ox + mouseOffX;
+    let py = (s.oy - scrollOff + mouseOffY + H*10) % H;
+
+    ctx.beginPath();
+    ctx.arc(px, py, s.size, 0, Math.PI*2);
+    let color;
+    if(s.gold) color = `rgba(232,196,96,${s.opacity*tw})`;
+    else if(s.blue) color = `rgba(74,158,255,${s.opacity*tw})`;
+    else color = `rgba(235,232,248,${s.opacity*tw})`;
+    ctx.fillStyle = color;
+    // glow for large stars
+    if(s.size > 1.5){
+      ctx.shadowBlur = 6;
+      ctx.shadowColor = s.gold ? '#e8c460' : '#ebe8f8';
+    } else { ctx.shadowBlur=0; }
+    ctx.fill();
+  });
+  ctx.shadowBlur = 0;
+  requestAnimationFrame(drawStars);
+}
+
+window.addEventListener('resize', ()=>{ resize(); initStars(); });
+window.addEventListener('mousemove', e=>{ mouse.x=e.clientX; mouse.y=e.clientY; });
+window.addEventListener('scroll', ()=>{ sy = window.scrollY; }, {passive:true});
+resize(); initStars(); drawStars();
+
+/* ══ NAV SCROLL STATE ══ */
+const nav = document.getElementById('nav');
+window.addEventListener('scroll', ()=>{
+  window.scrollY > 60 ? nav.classList.add('scrolled') : nav.classList.remove('scrolled');
+},{passive:true});
+
+/* ══ CARD DRAG SCROLL ══ */
+const track = document.getElementById('cards-track');
+let isDown=false, startX, scrollLeft;
+track.addEventListener('mousedown', e=>{ isDown=true; track.classList.add('active'); startX=e.pageX-track.offsetLeft; scrollLeft=track.scrollLeft; });
+track.addEventListener('mouseleave', ()=>isDown=false);
+track.addEventListener('mouseup', ()=>isDown=false);
+track.addEventListener('mousemove', e=>{ if(!isDown)return; e.preventDefault(); const x=e.pageX-track.offsetLeft; const walk=(x-startX)*1.4; track.scrollLeft=scrollLeft-walk; });
+
+/* ══ 3D CARD TILT ══ */
+document.querySelectorAll('[data-tilt]').forEach(card=>{
+  card.addEventListener('mousemove', e=>{
+    const r = card.getBoundingClientRect();
+    const cx = (e.clientX - r.left) / r.width - 0.5;
+    const cy = (e.clientY - r.top) / r.height - 0.5;
+    card.style.transform = `perspective(600px) rotateY(${cx*14}deg) rotateX(${-cy*10}deg) translateZ(8px)`;
+  });
+  card.addEventListener('mouseleave', ()=>{ card.style.transform='perspective(600px) rotateY(0) rotateX(0) translateZ(0)'; });
+});
+
+/* ══ INTRO TEXT REVEAL ══ */
+const introObs = new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      e.target.querySelectorAll('.reveal-inner').forEach((el,i)=>{
+        setTimeout(()=>el.classList.add('in'), i*110);
+      });
+      const sub = document.getElementById('intro-sub');
+      if(sub) setTimeout(()=>sub.classList.add('in'), 600);
+      introObs.unobserve(e.target);
+    }
+  });
+},{threshold:.2});
+const introEl = document.getElementById('intro');
+if(introEl) introObs.observe(introEl);
+
+/* ══ COUNTERS (light section) ══ */
+function animC(el, t){
+  const dur=1600, s=performance.now();
+  (function step(now){
+    const p=Math.min((now-s)/dur,1);
+    const e=1-Math.pow(1-p,3);
+    el.textContent=Math.floor(e*t)+'+'
+    if(p<1)requestAnimationFrame(step);
+    else el.textContent=t+'+';
+  })(s);
+}
+const cObs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{if(e.isIntersecting){animC(e.target,+e.target.dataset.t);cObs.unobserve(e.target);}});
+},{threshold:.5});
+document.querySelectorAll('.counter-v').forEach(el=>cObs.observe(el));
+
+/* ══ SPLIT SECTION PARALLAX ══ */
+const splitSec = document.getElementById('split');
+const splitInner = document.getElementById('split-inner');
+const floatPanel = document.getElementById('float-panel');
+const bgWord = document.getElementById('bg-word');
+const fpFill = document.getElementById('fp-fill');
+let fpFilled = false;
+
+window.addEventListener('scroll', ()=>{
+  if(!splitSec) return;
+  const r = splitSec.getBoundingClientRect();
+  const totalScroll = splitSec.offsetHeight - window.innerHeight;
+  const prog = Math.max(0, Math.min(1, -r.top / totalScroll));
+
+  // inner text drifts up slower
+  if(splitInner) splitInner.style.transform=`translateY(${prog * -40}px)`;
+  // panel drifts up faster (different speed = parallax)
+  if(floatPanel) floatPanel.style.transform=`translateY(${prog * 55}px)`;
+  // big bg word drifts up very fast
+  if(bgWord) bgWord.style.transform=`translateY(${prog * 80}px)`;
+
+  // fill bar when section is in view
+  if(prog > 0.1 && !fpFilled){
+    fpFill.style.width = '65%';
+    fpFilled = true;
+  }
+},{passive:true});
+
+/* ══ CTA SECTION REVEAL ══ */
+const ctaObs = new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      e.target.querySelectorAll('.cta-kicker,.cta-h,.cta-desc,.cta-actions').forEach((el,i)=>{
+        el.style.opacity='0';el.style.transform='translateY(24px)';
+        setTimeout(()=>{el.style.transition='opacity .8s ease, transform .8s ease';el.style.opacity='1';el.style.transform='translateY(0)';},i*120);
+      });
+      ctaObs.unobserve(e.target);
+    }
+  });
+},{threshold:.25});
+const ctaEl=document.getElementById('cta');
+if(ctaEl) ctaObs.observe(ctaEl);
+</script>
+</body>
+</html>
